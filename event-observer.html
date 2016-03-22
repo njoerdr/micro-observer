@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Observer</title>
+    <style type="text/css">
+		body, input {
+			font-size: 1.5rem;
+		}
+    </style>
+    <script type="text/javascript">
+
+        var Observable = function() {
+            var eventTarget = document.createDocumentFragment();
+            this.emit = function(type, eventDetails) {
+                var event = new CustomEvent(type, { 'detail': eventDetails });
+                return eventTarget.dispatchEvent(event);
+            }
+            this.on = function(type, listener) {
+                return eventTarget.addEventListener(type, listener);
+            }
+            this.off = function(type, listener) {
+                return eventTarget.removeEventListener(type, listener);
+            }
+        }
+
+    	var Model = function() {
+            Observable.call(this);
+    		var text = 'ein text';
+
+            Object.defineProperty(this, 'text', {
+                get:function(){
+                    return text;
+                },
+                set:function(value){
+                    text = value;
+                    this.emit('change', {'key':'text','value':value});
+                }
+            });
+    	}
+
+
+    	var View = function(model) {
+    		var field = document.querySelector('p');
+    		// ------OBSERVER-------
+    		var observer = function(event){
+    		  console.log(event.detail);
+    		  field.innerHTML = model.text;
+    		};
+    		model.on('change', observer);
+    		// ------INIT-------
+    		field.innerHTML = model.text;
+    		
+    		
+    	}
+    	document.addEventListener('DOMContentLoaded', function(){
+            var model = new Model();
+    		var view = new View(model);
+    		document.querySelector('input').addEventListener('input', function(){
+    			model.text = document.querySelector('input').value;
+    		});
+    	});
+    </script>
+</head>
+<body>
+	<p></p>
+	<input type="text" value="" />
+</body>
+</html>
